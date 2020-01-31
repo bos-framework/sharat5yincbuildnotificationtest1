@@ -1,0 +1,150 @@
+﻿@model dynamic;
+@using Microsoft.AspNetCore.Http;
+@using BOS.StarterCode.Helpers.MultiTenancy;
+@using Newtonsoft.Json;
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+@{
+    WhiteLabel appconfig = null;
+    if (HttpContextAccessor.HttpContext.Session.GetString("ApplicationConfig") != null)
+    {
+        appconfig = JsonConvert.DeserializeObject<WhiteLabel>(HttpContextAccessor.HttpContext.Session.GetString("ApplicationConfig"));
+    }
+}
+@if (@Model != null)
+{
+
+    <a id="show-sidebar" class="btn btn-sm btn-dark" href="#">
+        <i class="fas fa-bars"></i>
+    </a>
+
+    <nav id="sidebar" class="sidebar-wrapper">
+        <div class="sidebar-content">
+            <div class="sidebar-brand">
+                <a href="#">
+                    <img src=@(appconfig!=null && !string.IsNullOrEmpty(appconfig.Logo) ?  appconfig.Logo : "../images/logo.png") />
+                </a>
+                <div id="close-sidebar">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+
+            <div class="sidebar-header">
+                @if (@Model.Initials != null)
+                {
+                    <div style="margin-left: 30%;">
+                        <p id="pInitials" data-letters="@Model.Initials"></p>
+                    </div>
+                }
+                else
+                {
+                    <div class="user-pic">
+                        <img class="img-responsive img-rounded" src="https://raw.githubusercontent.com/azouaoui-med/pro-sidebar-template/gh-pages/src/img/user.jpg"
+                             alt="User picture">
+                    </div>
+                }
+                <div class="user-info">
+                    @if (@Model.Username != null)
+                    {
+                        <strong id="strongUsername">@Model.Username</strong>
+                    }
+                    @if (@Model.Roles != null)
+                    {
+                        <span class="user-role">@Model.Roles</span>
+                    }
+                    <span class="user-status">
+                        <i class="fa fa-circle"></i>
+                        <span>Online</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu">
+                <ul id="navigation-tree">
+
+                    @if (Model.ModuleOperations != null)
+                    {
+                        @foreach (var module in Model.ModuleOperations)
+                        {
+                            @if (module.ChildComponents.Count == 0)
+                            {
+                                if (@module.Code != "PRMNS")
+                                {
+                                    <li id="@module.Id" parentmoduleid="@module.ParentId">
+                                        <a asp-controller="Navigation" asp-action="NavigateToModule" asp-route-id="@module.Id" asp-route-code="@module.Code" asp-route-isdefault="@module.IsDefault">
+                                            <i class="fa fa-tachometer-alt"></i>
+                                            <span>@module.Name</span>
+                                        </a>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="sidebar-dropdown">
+                                    <a asp-controller="Navigation" asp-action="NavigateToModule" asp-route-id="@module.Id" asp-route-code="@module.Code" asp-route-isdefault="@module.IsDefault">
+                                        <i class="far fa-user"></i>
+                                        <span>@module.Name</span>
+                                    </a>
+
+                                    <div class="sidebar-submenu" id="@module.Id" parentmoduleid="@module.ParentId">
+                                        <ul>
+                                            @foreach (var submodule in module.ChildComponents)
+                                            {
+                                                <partial name="~/Views/Shared/Navigation/NavigationMenuItem.cshtml" model="@module.ChildComponents" />
+                                            }
+                                        </ul>
+                                    </div>
+                                </li>
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+            <!-- sidebar-menu  -->
+        </div>
+        <!-- sidebar-content  -->
+        <div class="sidebar-footer">
+            <a href="#">
+                <i class="fa fa-power-off" onclick="InitiateSignOut();"></i>
+            </a>
+        </div>
+    </nav>
+}
+<style>
+    [data-letters]:before {
+        content: attr(data-letters);
+        display: inline-block;
+        font-size: 2.5em;
+        width: 2.5em;
+        height: 2.5em;
+        line-height: 2.5em;
+        text-align: center;
+        border-radius: 50%;
+        background: #ffc107;
+        vertical-align: middle;
+        margin-right: 5em;
+        color: white;
+    }
+</style>
+
+
+@if (Model != null && Model.CurrentModuleId != null)
+{
+    <script>
+        $(document).ready(function () {
+            DisplayDashboardCustomMessage(Model.CurrentModuleId);
+            NavigationState(Model.CurrentModuleId);
+        });
+    </script>
+}
+
+<script type="text/javascript">
+    jQuery(function ($) {
+        $("#close-sidebar").click(function () {
+            $(".page-wrapper").removeClass("toggled");
+        });
+
+        $("#show-sidebar").click(function () {
+            $(".page-wrapper").addClass("toggled");
+        });
+    });
+</script>

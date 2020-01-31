@@ -1,0 +1,27 @@
+﻿@model dynamic;
+
+@if (Model != null)
+{
+    foreach (var operation in Model)
+    {
+        <div style="margin-left: 35px; margin-top: 15px;">
+            <ul class="mt-2 js_op_container">
+                <li class="js_operation js_op_child" id="@operation.Id">
+                    <div class="li-body">
+                        <div class="col-sm-12">
+                            <div class="checkboxwrapper operations">
+                                <i class="fas fa-cog" aria-hidden="true" style="font-size: large;"></i><span style="font-size: large;"> @operation.Name </span>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+
+            @if (operation.ChildOperations != null && operation.ChildOperations.Count > 0)
+            {
+                <partial name="~/Views/Dashboard/_OperationList.cshtml" model="@operation.ChildOperations" />
+            }
+        </div>
+    }
+}

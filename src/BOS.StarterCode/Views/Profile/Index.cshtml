@@ -1,0 +1,264 @@
+﻿@using BOS.StarterCode.Helpers;
+
+@model dynamic;
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<script type="text/javascript">
+    var Model=@JavaScriptConvert.SerializeObject(Model);
+    Model.Role =@(JavaScriptConvert.SerializeObject(User.FindFirst(c => c.Type == "Role").Value.ToString()));
+    @{
+        var UserRole = User.FindFirst(c => c.Type == "Role").Value.ToString();
+        var IsUserAllowed = UserRole.Contains("Admin");
+        var rolesList = UserRole.Split(',').ToList();
+        var Operations = (Model != null && Model.Operations != null) ? Model.Operations : null ;
+    }
+</script>
+
+<partial name="~/Views/Shared/Navigation/NavigationMenu.cshtml" />
+
+<main class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>My Profile</h1>
+                <hr />
+                <br />
+            </div>
+            <div class="col-md-6">
+                @{
+                    @if (Operations != null)
+                    {
+                        @if (Operations.Contains("PVIEW") || Operations.Contains("ALL"))
+                        {
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h4>Personal Details</h4>
+                                </div>
+                                <div class="col-md-12">
+                                    <form class="d-block" style="width:100%">
+                                        <div class="row">
+                                            <div class="col-md-6 mt-3">
+                                                <div class="form-group">
+                                                    <label for="@Model.UserInfo.FirstName">
+                                                        First Name <span style="color: red;">*</span>
+                                                    </label>
+                                                    @if (Operations.Contains("PEDIT") || Operations.Contains("ALL"))
+                                                    {
+                                                        <input type="text" id="profileFirstName" class="form-control" placeholder="Enter First Name" value="@Model.UserInfo.FirstName" autocomplete="off" />
+                                                        <span id="spanFirstName" style="color: red;"></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="text" id="profileFirstName" class="form-control" value="@Model.UserInfo.FirstName" disabled />
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 mt-3">
+                                                <div class="form-group">
+                                                    <label for="@Model.UserInfo.LastName">
+                                                        Last Name <span style="color: red;">*</span>
+                                                    </label>
+                                                    @if (Operations.Contains("PEDIT") || Operations.Contains("ALL"))
+                                                    {
+                                                        <input type="text" id="profileLastName" class="form-control" placeholder="Enter Last Name" value="@Model.UserInfo.LastName" autocomplete="off" />
+                                                        <span id="spanLastName" style="color: red;"></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="text" id="profileLastName" class="form-control" value="@Model.UserInfo.LastName" disabled />
+                                                    }
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-md-6 mt-3">
+                                                <div class="form-group">
+                                                    <label for="@Model.UserInfo.Email">
+                                                        Email Address <span style="color: red;">*</span>
+                                                    </label>
+                                                    @if (Operations.Contains("PEDIT") || Operations.Contains("ALL"))
+                                                    {
+                                                        <input type="text" id="profileEmail" class="form-control" placeholder="Enter Last Name" value="@Model.UserInfo.Email" autocomplete="off" />
+                                                        <span id="spanEmail" style="color: red;"></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="text" id="profileEmail" class="form-control" value="@Model.UserInfo.Email" disabled />
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mt-3">
+                                                <div class="form-group">
+                                                    @if (Operations.Contains("PEDIT") || Operations.Contains("ALL"))
+                                                    {
+                                                        <button id="profileUpdate " class="btn btn-primary" onclick="UpdateProfileInfo(); return false;">Update</button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button class="btn btn-primary" disabled>Update</button>
+                                                    }
+                                                </div>
+
+                                                @Html.ValidationMessage("CustomError")
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="row">
+                                            <div class="col-md-6 mt-3">
+                                                <h4>Username</h4>
+                                                <br />
+                                                <div class="form-group">
+                                                    @if (Operations.Contains("PEDIT") || Operations.Contains("ALL"))
+                                                    {
+                                                        <input type="email" id="profileUsername" class="form-control" placeholder="Enter Email Address" value="@Model.UserInfo.Username" required autocomplete="off" />
+                                                        <span id="spanUsername" style="color: red;"></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="email" id="profileUsername" class="form-control" placeholder="Enter Email Address" value="@Model.UserInfo.Username" disabled />
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6"></div>
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    @if (Operations.Contains("PEDIT") || Operations.Contains("ALL"))
+                                                    {
+                                                        <button class="btn btn-primary" onclick="UpdateUsername(); return false;">Update Username</button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button class="btn btn-primary" disabled>Update</button>
+                                                    }
+                                                </div>
+                                                @Html.ValidationMessage("CustomError")
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="row">
+                                            <div class="col-md-6 mt-3 disabled">
+                                                <div class="form-group" id="divRoleBase">
+                                                    <h4>Roles</h4>
+                                                    <br />
+                                                    @{
+                                                        @foreach (var role in rolesList)
+                                                        {
+                                                            <input type="checkbox" checked="checked" disabled /> @role <br />
+                                                        }
+                                                    }
+
+                                                    @* IF MY PROFILE HAD THE ABILITY TO ASLO UPDATE ROLES, UNCOMMENT THIS SECTION AND COMMENT THE FOREACH ABOVE
+                                                            @{
+                                                            @foreach (var role in Model.AvailableRoles)
+                                                            {
+                                                                @if (rolesList.Contains(role.Name.ToString()))
+                                                                {
+                                                                    <input type="checkbox" value="@role.Id" id="@role.Id" for="@role.Id" checked="checked" disabled /> @role.Name <br />
+                                                                }
+                                                            }
+                                                        }*@
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                    <hr />
+
+                                    <div class="row">
+                                        <div class="col-sm-6 mt-3">
+
+                                            @if (Operations.Contains("CHPWD") || Operations.Contains("ALL"))
+                                            {
+                                                <h4>Change Password</h4>
+                                                <form>
+                                                    <button class="btn btn-primary" asp-action="ChangePassword">Change Password</button>
+                                                    @Html.ValidationMessage("CustomError")
+                                                </form>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <h3> Sorry, you have no access to this feature </h3>
+                        }
+                    }
+                    else
+                    {
+                        <h3> Sorry, you have no access to this feature! </h3>
+                        <a href="javascript:void(0);" onclick="history.go(-1);">Go Back</a>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    @{
+        @Html.Hidden("IsUserAllowed", IsUserAllowed);
+    }
+</main>
+
+@if (ViewBag.Message != null)
+{
+    <script>
+        $(document).ready(function () {
+            $(function () {
+                DisplayDialog({ Success: true, Message: '@ViewBag.Message' });
+            });
+        });
+    </script>
+}
+
+
+@if (Model != null && Model.CurrentModuleId != null)
+{
+    <script>
+        var currentModule = $('a[id^="' + Model.CurrentModuleId + '"]');
+
+        currentModule.next(".sidebar-submenu").slideDown(200);
+        currentModule.parent().addClass("active");
+    </script>
+}
+
+<script type="text/javascript">
+    $('#profileFirstName').on('keyup', function () {
+        if ($("#profileFirstName")[0].value.length > 0) {
+            $("#spanFirstName")[0].innerHTML = '';
+        }
+    });
+
+    $('#profileLastName').on('keyup', function () {
+        if ($("#profileLastName")[0].value.length > 0) {
+            $("#spanLastName")[0].innerHTML = '';
+        }
+    });
+
+    $('#profileEmail').on('keyup', function () {
+        if ($("#profileEmail")[0].value.length > 0 && IsEmailValid($("#profileEmail")[0].value)) {
+            $("#spanEmail")[0].innerHTML = '';
+        }
+    });
+
+    $('#profileUsername').on('keyup', function () {
+        if ($("#profileUsername")[0].value.length > 0) {
+            $("#spanUsername")[0].innerHTML = '';
+        }
+    });
+</script>
+
+<style>
+    .field-validation-error {
+        color: red;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

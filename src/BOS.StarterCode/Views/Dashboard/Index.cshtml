@@ -1,0 +1,73 @@
+﻿@using BOS.StarterCode.Helpers;
+
+@model dynamic;
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<script type="text/javascript">
+
+    var Model=@JavaScriptConvert.SerializeObject(Model);
+    Model.Role =@(JavaScriptConvert.SerializeObject(User.FindFirst(c => c.Type == "Role").Value.ToString()));
+    @{
+        var UserRole = User.FindFirst(c => c.Type == "Role").Value.ToString();
+        var IsuserAllowed = UserRole.Contains("Admin");
+     }
+
+</script>
+
+<partial name="~/Views/Shared/Navigation/NavigationMenu.cshtml" />
+
+<main class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Dashboard</h1>
+                <hr />
+            </div>
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="divMessage" style="font-size: x-large; color: #ffc107;"></div>
+                        @{ try
+                            {
+                                @if (Model.Operations != null)
+                                {
+                                    <br />
+                                    <div style="font-size: large;"><strong>Allowed Operations:</strong></div>
+
+                                    foreach (var operation in Model.Operations)
+                                    {
+                                        <div style="margin-top: 15px;">
+                                            <ul class="mt-2 js_op_container">
+                                                <li class="js_operation js_op_child" id="@operation.Id">
+                                                    <div class="li-body">
+                                                        <div class="col-sm-12">
+                                                            <div class="checkboxwrapper operations">
+                                                                <i class="fas fa-cog" aria-hidden="true" style="font-size: large;"></i><span style="font-size: large;"> @operation.Name </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+
+                                            @if (operation.ChildOperations != null && operation.ChildOperations.Count > 0)
+                                            {
+                                                <partial name="~/Views/Dashboard/_OperationList.cshtml" model="@operation.ChildOperations" />
+                                            }
+                                        </div>
+                                    }
+                                }
+                            }
+                            catch
+                            {
+                                <h4 style="color:#ffcc00">The Dashboard comes here</h4>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

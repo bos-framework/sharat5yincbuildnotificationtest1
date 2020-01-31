@@ -1,0 +1,178 @@
+﻿
+@using BOS.StarterCode.Helpers;
+
+@model dynamic;
+
+@{
+    ViewData["Title"] = "Permissions";
+}
+
+<script type="text/javascript">
+
+    var Model=@JavaScriptConvert.SerializeObject(Model);
+    Model.Role =@(JavaScriptConvert.SerializeObject(User.FindFirst(c => c.Type == "Role").Value.ToString()));
+    @{
+        var UserRole = User.FindFirst(c => c.Type == "Role").Value.ToString();
+        var IsuserAllowed = UserRole.Contains("Admin");
+        var IsValidRole = false;
+        @try
+        {
+            @if (Model != null && Model.RoleName != null)
+            {
+                IsValidRole = true;
+            }
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+</script>
+
+<partial name="~/Views/Shared/Navigation/NavigationMenu.cshtml" />
+
+<main class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Permissions</h1>
+                <hr />
+                @try
+                {
+                    @if (Model != null && Model.RoleName != null)
+                    {
+                        <h4 class="mb-4">@Model.RoleName</h4>
+                    }
+                }
+                catch (Exception)
+                {
+                    <h4 class="mb-4">Role name</h4>
+                    @Html.ValidationMessage("CustomError")
+                }
+                @if (IsValidRole)
+                {
+                    <input class="btn btn-primary mr-2" type="button" onclick="OnPermissionsSave(); return false;" value="Save Permissions" />
+                }
+                <a asp-action="BackToRoles">Back to Roles</a>
+            </div>
+            <div class="col-md-12">
+                <div class="row mt-4" id="divPermissionsBase">
+                    <div class="col-md-12">
+                        @if (Model != null && Model.ModuleOperations != null && IsValidRole)
+                        {
+                            @foreach (var module in Model.ModuleOperations)
+                            {
+                                <ul class="modules-list-edit">
+                                    <li class="module js_module js_module_child" id="@module.Id">
+                                        <div class="li-body">
+                                            <div class="col-sm-12">
+                                                <div class="modules">
+                                                    <input id="@module.Id" name="@module.Name" code="@module.Code" isdefault="@module.IsDefault" parentmoduleid="@module.ParentId" type="checkbox" class="modulecheck" onclick="OnModuleSelected(this);" checked="@module.IsPermitted">
+                                                    <label for="@module.Id"><i class="fas fa-cube" aria-hidden="true"></i>@module.Name</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if (module.Operations.Count > 0)
+                                        {
+                                            @foreach (var operation in module.Operations)
+                                            {
+                                                <ul class="mt-2 js_op_container">
+                                                    <li class="js_operation js_op_child" id="@operation.Id">
+                                                        <div class="li-body">
+                                                            <div class="col-sm-12">
+                                                                <div class="checkboxwrapper operations">
+                                                                    <input type="checkbox" id="@operation.Id" name="@operation.Name" moduleid="@module.Id" code="@operation.Code" isdefault="@operation.IsDefault" parentoperationid="@operation.ParentOperationId" class="operationcheck" checked="@operation.IsPermitted">
+                                                                    <label for="@operation.Id"><i class="fas fa-cog" aria-hidden="true"></i>@operation.Name</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                                @if (operation.ChildOperations != null && operation.ChildOperations.Count > 0)
+                                                {
+                                                    <partial name="~/Views/Permissions/_Operations.cshtml" model="@operation.ChildOperations" />
+                                                }
+                                            }
+                                        }
+                                        @if (module.ChildComponents.Count > 0)
+                                        {
+                                            <partial name="~/Views/Permissions/_ModuleOperations.cshtml" model="@module.ChildComponents" />
+                                        }
+                                    </li>
+                                </ul>
+                                <hr style="border: 1px solid gray;" />
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @{
+        @try
+        {
+            <input type="hidden" id="hiddenOwnerId" value="@Model.OwnerId" />
+        }
+        catch (Exception)
+        { }
+    }
+</main>
+
+
+<script type="text/javascript">
+    $(document).mouseup(function (e) {
+        var container = $("#action_div");
+        if (!container.is(e.target) && container.has(e.target).length === 0) {
+            container.hide();
+        }
+    });
+
+    $(function () {
+        $('#show_action_div').click(function () {
+            $('#action_div').show();
+            return false;
+        });
+    });
+
+    //Checking/Unchecking all the operation checkboxes based on selection/ deselection of module
+    $(document).on('change', '.modulecheck', function (module) {
+        var moduleId = module.currentTarget.id;
+        $("input[moduleid='" + moduleId + "'").prop("checked", this.checked);
+    });
+
+    //Checking/Unchecking the module checkbox based on based on operation checklist
+    $(document).on('change', '.operationcheck', function (operation) {
+
+        //Logic for selecting the module check-box when the operation check box is selected
+        var moduleId = operation.currentTarget.getAttribute('moduleid');
+
+        if ($('input[type="checkbox"][moduleid="' + moduleId + '"]:checked').length > 0) {
+            $("input[id='" + moduleId + "'").prop("checked", "checked");
+        }
+
+        //Logic for selecting the immediate children and parent checkboxes for the operation
+        var operationId = operation.currentTarget.id;
+
+        if ($('input[type="checkbox"][id="' + operationId + '"]:checked').length > 0) {
+            $("input[parentoperationid='" + operationId + "'").prop("checked", "checked");
+
+            var operationParentId = operation.currentTarget.getAttribute('parentoperationid');;
+            $("input[id='" + operationParentId + "'").prop("checked", "checked");
+        }
+        else {
+            $("input[parentoperationid='" + operationId + "'").prop("checked", "");
+        }
+    });
+
+</script>
+
+<style>
+    .field-validation-error {
+        color: red;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,150 @@
+﻿@using BOS.StarterCode.Helpers;
+
+@model dynamic;
+
+@{
+    ViewData["Title"] = "Add User";
+}
+
+<script type="text/javascript">
+    var Model=@JavaScriptConvert.SerializeObject(Model);
+    Model.Role =@(JavaScriptConvert.SerializeObject(User.FindFirst(c => c.Type == "Role").Value.ToString()));
+    @{
+        var UserRole = User.FindFirst(c => c.Type == "Role").Value.ToString();
+        var IsUserAllowed = UserRole.Contains("Admin");
+        var UserId = User.FindFirst(c => c.Type == "UserId").Value.ToString();
+    }
+</script>
+
+<partial name="~/Views/Shared/Navigation/NavigationMenu.cshtml" />
+
+<main class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 class="mt-3">Edit Role</h1>
+                <hr />
+            </div>
+            <div class="col-md-12">
+                <div class="row mt-5">
+                    <div class="col-lg-5">
+
+                        @{
+                            if (@Model.RoleInfo != null)
+                            {
+                                <form>
+                                    <input type="hidden" id="hiddenEditUserId" value="@Model.RoleInfo.Id" />
+
+                                    <div class="form-group position-relative">
+                                        <label>
+                                            Role Name <span style="color: red;">*</span>
+                                        </label>
+                                        <input type="text" id="editRoleName" class="form-control" placeholder="Enter Role Name" autocomplete="off" required value="@Model.RoleInfo.Name" />
+                                        <span id="spanRoleName" class="required_field"></span>
+                                    </div>
+                                    <br />
+
+                                    <div class="form-group">
+                                        <label>
+                                            Role Description
+                                        </label>
+                                        <input type="text" id="editRoleDescription" class="form-control" placeholder="Enter Role Description" autocomplete="off" value="@Model.RoleInfo.Description" />
+                                        <span id="spanRoleName" style="color: red;"></span>
+                                    </div>
+
+                                    <div class="form-group position-relative">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="astrix">*</div>
+                                                <label for="auth-level">Auth Level</label>
+                                                <select id="auth-level" value="@Model.RoleInfo.AuthLevel">
+                                                    <option value="Engineer">Engineer</option>
+                                                    <option value="SuperAdmin">Super Admin</option>
+                                                    <option value="Admin">Admin</option>
+                                                    <option value="User">User</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <br />
+
+                                    <div class="form-group none">
+                                        <input type="text" id="editRoleRank" class="form-control" value="@Model.RoleInfo.Rank" />
+                                    </div>
+                                    <br />
+
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <button class="btn btn-primary d-block w-100" onclick="OnRoleUpdateClicked(); return false;">Update </button>
+                                        </div>
+                                    </div>
+                                    @Html.ValidationMessage("CustomError")
+                                </form>
+
+                            }
+                            else
+                            {
+                                <div>Something went wrong. Please try again.</div>
+                            }
+                        }
+                        <div class="row">
+                            <div class="col-md-12">
+                                <a asp-action="Index">Back to Roles</a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+@if (ViewBag.Message != null)
+{
+    <script>
+        $(document).ready(function () {
+            $(function () {
+                var message = @ViewBag.Message;
+                if (message.indexOf('success') > -1)
+                    DisplayDialog({ Success: true, Message: message });
+                else
+                    DisplayDialog({ Success: false, Message: message });
+            });
+        });
+    </script>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#auth-level").val("@Model.RoleInfo.AuthLevel");
+
+    });
+</script>
+
+<style>
+    .field-validation-error {
+        color: red;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+<script>
+    $('#editRoleName').on('keyup', function () {
+        if ($("#editRoleName")[0].value.length > 0) {
+            var pattern = new RegExp(/[~`!#$%\^@@&*+=\-\[\]\\';,/{}|\\":<>\?]/); //unacceptable chars
+            if (pattern.test($("#editRoleName")[0].value)) {
+                $("#spanRoleName")[0].innerHTML = "Role name cannot include special characters.";
+            }
+            else {
+                $("#spanRoleName")[0].innerHTML = '';
+            }
+        }
+    });
+</script>

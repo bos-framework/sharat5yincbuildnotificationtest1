@@ -1,0 +1,27 @@
+﻿@model dynamic;
+
+@if (Model != null)
+{
+    @foreach (var operation in Model)
+    {
+        <div style="margin-left: 35px; margin-top: 5px;">
+            <ul class="mt-2 js_op_container">
+                <li class="js_operation js_op_child" id="@operation.Id">
+                    <div class="li-body">
+                        <div class="col-sm-12">
+                            <div class="checkboxwrapper operations">
+                                <input type="checkbox" id="@operation.Id" name="@operation.Name" moduleid="@operation.ModuleId" code="@operation.Code" isdefault="@operation.IsDefault" parentoperationid="@operation.ParentOperationId" class="operationcheck" checked="@operation.IsPermitted">
+                                <label for="@operation.Id"><i class="fas fa-cog" aria-hidden="true"></i>@operation.Name</label>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+            @if (operation.ChildOperations != null && operation.ChildOperations.Count > 0)
+            {
+                <partial name="~/Views/Permissions/_Operations.cshtml" model="@operation.ChildOperations" />
+            }
+        </div>
+    }
+}

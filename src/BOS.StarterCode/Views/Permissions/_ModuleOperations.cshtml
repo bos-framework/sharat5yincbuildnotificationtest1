@@ -1,0 +1,51 @@
+﻿@model dynamic;
+
+@if (Model != null)
+{
+    @foreach (var module in Model)
+    {
+        <ul class="modules-list-edit">
+            <li class="module js_module js_module_child" id="@module.Id">
+                <div class="li-body">
+                    <div class="col-sm-12">
+                        <div class="modules">
+                            <input id="@module.Id" name="@module.Name" code="@module.Code" isdefault="@module.IsDefault" parentmoduleid="@module.ParentId" type="checkbox" class="modulecheck" onclick="OnModuleSelected(this);" checked="@module.IsPermitted">
+                            <label for="@module.Id"><i class="fas fa-cube" aria-hidden="true"></i>@module.Name</label>
+                        </div>
+                    </div>
+                </div>
+
+                @if (module.Operations.Count > 0)
+                {
+                    @foreach (var operation in module.Operations)
+                    {
+                        <ul class="mt-2 js_op_container">
+                            <li class="js_operation js_op_child" id="@operation.Id">
+                                <div class="li-body">
+                                    <div class="col-sm-12">
+                                        <div class="checkboxwrapper operations">
+                                            
+                                            <label for="@operation.Id"><i class="fas fa-cog" aria-hidden="true"></i>@operation.Name</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+
+                        @if (operation.ChildOperations.Count > 0)
+                        {
+                            <hr />
+                            <partial name="~/Views/Permissions/_Operations.cshtml" model="@operation.ChildOperations" />
+                        }
+                    }
+                }
+
+                @if (module.ChildComponents.Count > 0)
+                {
+                    <hr />
+                    <partial name="~/Views/Permissions/_ModuleOperations.cshtml" model="@module.ChildComponents" />
+                }
+            </li>
+        </ul>
+    }
+}

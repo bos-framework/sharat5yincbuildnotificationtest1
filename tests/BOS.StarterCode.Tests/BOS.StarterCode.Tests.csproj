@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="3.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\BOS.StarterCode\BOS.StarterCode.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BOS.Auth.Client">
+      <HintPath>..\..\bos-client-libraries\BOS.Auth.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="BOS.Base.Client">
+      <HintPath>..\..\bos-client-libraries\BOS.Base.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="BOS.Email.Client">
+      <HintPath>..\..\bos-client-libraries\BOS.Email.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="BOS.IA.Client">
+      <HintPath>..\..\bos-client-libraries\BOS.IA.Client.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.test.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
